@@ -5,7 +5,9 @@ const { spy } = require('sinon');
 /**
  * creates an async function stub
  * @param {Object} config - stub configuration
- * @param {Boolean} [config.ctxRequired] - require ctx to bound
+ * @param {Object} config.ctx - ctx configuration
+ * @param {Error} [config.ctx.err] - ctx error
+ * @param {Boolean} [config.ctx.required] - ctx requirement
  * @param {Object} [config.data] - method response data
  * @param {Error} [config.err] - method error
  * @returns {Object} - async function stub

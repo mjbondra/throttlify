@@ -1,0 +1,40 @@
+{
+  "name": "throttlify",
+  "version": "1.0.0",
+  "description": "a function that returns a throttled variant of a Promise-returning function",
+  "main": "lib/index.js",
+  "author": "Michael J. Bondra <mjbondra@gmail.com> (https://mjbondra.com)",
+  "license": "MIT",
+  "keywords": [
+    "rate",
+    "ratelimit",
+    "ratelimiting",
+    "rate-limit",
+    "rate-limiting",
+    "throttle",
+    "throttling"
+  ],
+  "repository": "gitlab:wondermonger/throttlify",
+  "scripts": {
+    "lint": "eslint \"**/*.js\"",
+    "test": "yarn test:unit && yarn test:integration && yarn test:coverage",
+    "test:coverage": "nyc -r text -r html mocha -R progress \"test/unit/**/*.js\"",
+    "test:integration": "mocha \"test/integration/**/*.js\"",
+    "test:unit": "mocha \"test/unit/**/*.js\""
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "dirty-chai": "^2.0.1",
+    "eslint": "^4.19.1",
+    "eslint-config-wondermonger": "^2.0.3",
+    "eslint-plugin-import": "^2.11.0",
+    "eslint-plugin-node": "^5.2.0",
+    "eslint-plugin-promise": "^3.7.0",
+    "eslint-plugin-standard": "^3.1.0",
+    "mocha": "^5.1.1",
+    "nyc": "^11.7.1",
+    "sinon": "^4.5.0",
+    "sinon-chai": "^3.0.0",
+    "yarn": "^1.6.0"
+  }
+}

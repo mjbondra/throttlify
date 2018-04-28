@@ -58,7 +58,7 @@ describe('throttlify', () => {
       const data = await throttledAsyncFunction();
       const duration = Date.now() - start;
       expect(data).to.equal(stubConfig.asyncFunction.data);
-      expect(duration).to.be.greaterThan(opts.ms);
+      expect(duration).to.be.at.least(opts.ms);
     });
 
     it('should have catchable async function errors', async () => {

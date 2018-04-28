@@ -53,8 +53,8 @@ describe('throttlify', () => {
     });
 
     it('should defer the execution of the async function when the queue is larger than the max', async () => {
-      Array.from(new Array(opts.max)).forEach(() => throttledAsyncFunction());
       const start = Date.now();
+      Array.from(new Array(opts.max)).forEach(() => throttledAsyncFunction());
       const data = await throttledAsyncFunction();
       const duration = Date.now() - start;
       expect(data).to.equal(stubConfig.asyncFunction.data);

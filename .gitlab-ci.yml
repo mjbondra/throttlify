@@ -27,8 +27,12 @@ unit:
   stage: test
 
 integration:
+  services:
+    - redis
   script: ci-node-test integration
   stage: test
+  variables:
+    REDIS_HOST: redis
 
 coverage:
   artifacts:

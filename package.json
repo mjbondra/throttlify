@@ -19,7 +19,7 @@
     "lint": "eslint \"**/*.js\"",
     "test": "yarn test:unit && yarn test:integration && yarn test:coverage",
     "test:coverage": "nyc -r text -r html mocha -R progress \"test/unit/**/*.js\"",
-    "test:integration": "mocha \"test/integration/**/*.js\"",
+    "test:integration": "mocha --timeout 5000 \"test/integration/**/*.js\"",
     "test:unit": "mocha \"test/unit/**/*.js\""
   },
   "devDependencies": {
@@ -31,10 +31,15 @@
     "eslint-plugin-node": "^5.2.0",
     "eslint-plugin-promise": "^3.7.0",
     "eslint-plugin-standard": "^3.1.0",
+    "ioredis": "^3.2.2",
+    "koa": "^2.5.1",
+    "koa-ratelimit": "^4.1.0",
     "mocha": "^5.1.1",
+    "node-fetch": "^2.1.2",
     "nyc": "^11.7.1",
     "sinon": "^4.5.0",
     "sinon-chai": "^3.0.0",
+    "yargs": "^11.0.0",
     "yarn": "^1.6.0"
   }
 }

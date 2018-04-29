@@ -1,6 +1,6 @@
 {
   "name": "throttlify",
-  "version": "1.0.0-0",
+  "version": "1.0.0",
   "description": "A function that returns a throttled variant of a Promise-returning function.",
   "main": "lib/index.js",
   "author": "Michael J. Bondra <mjbondra@gmail.com> (https://mjbondra.com)",

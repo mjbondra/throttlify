@@ -19,8 +19,10 @@ const config = {
   redis: {
     db: env.REDIS_DB || 0,
     host: env.REDIS_HOST || 'localhost',
-    password: env.REDIS_PASSWORD || null,
-    port: env.REDIS_PORT || 6379
+    options: {
+      password: env.REDIS_PASSWORD || null,
+      port: env.REDIS_PORT || 6379
+    }
   }
 };
 
@@ -35,9 +37,9 @@ describe('integration', () => {
   let url;
 
   before(() => {
-    db = new Redis(config.redis.port, config.redis.host);
+    db = new Redis(config.redis.port, config.redis.host, config.redis.options);
     errorMessage = 'rate limit exceeded';
-    opts = { duration: 1000, max: 2 };
+    opts = { duration: 1000, max: 20 };
     app = koaApp({ db, errorMessage, ...opts });
     server = app.listen(config.node);
   });

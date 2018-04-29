@@ -17,12 +17,12 @@ const config = {
     port: env.NODE_PORT || 3000
   },
   redis: {
-    db: env.REDIS_DB || 0,
     host: env.REDIS_HOST || 'localhost',
     options: {
-      password: env.REDIS_PASSWORD || null,
-      port: env.REDIS_PORT || 6379
-    }
+      db: env.REDIS_DB || 0,
+      password: env.REDIS_PASSWORD || null
+    },
+    port: env.REDIS_PORT || 6379
   }
 };
 

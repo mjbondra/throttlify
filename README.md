@@ -18,18 +18,22 @@ npm i throttlify
 
 ## Usage
 
+### Prerequisites
+
+- [node@>=8.3.0](https://nodejs.org)
+
 ### API
 
 #### `throttlify(asyncFn, [opts], [ctx])`
 
 - **asyncFn** {*Function*} asynchronous function (*required*)
 - [**opts**] {*Object*} throttle options
-  - [**duration**=15000] {*Number*} throttle duration
+  - [**duration**=15000] {*Number*} throttle duration in milliseconds
   - [**max**=10] {*Number*} maximum number of requests per duration
-- [**ctx**] {*Object*} context
+- [**ctx**] {*Object*} `this` parameter for the **asyncFn** function
 - **returns** {*Function*} throttled asynchronous function
 
-### Example
+### Code Example
 
 ```javascript
 'use strict';
@@ -45,39 +49,55 @@ Array.from(new Array(45)).forEach((v, i) => throttledFetch(`url/${i}`));
 // this call will execute 60 seconds after the completion of the first request
 throttledFetch(url)
   .then(res => res.json())
-  .then(json => handleResponse(json))
+  .then(body => handleResponse(body))
   .catch(err => handleError(err));
 
 ```
 
-## Tests
+## Development
+
+Merge requests should be submitted to [https://gitlab.com/wondermonger/throttlify](https://gitlab.com/wondermonger/throttlify).
+
+### Installation
 
 ```shell
-yarn test
+yarn
 ```
 
-**Linting**
+### Linting
 
 ```shell
 yarn lint
 ```
 
-**Unit Tests**
+### Testing
 
 ```shell
-yarn test:unit
-```
+# all tests
+yarn test
 
-**Integration Tests**
-
-```shell
+# integration tests
 yarn test:integration
+
+# unit tests
+yarn test:unit
+
+# coverage tests
+yarn test:coverage
+
 ```
 
-**Coverage Tests**
+The integration tests create an ephemeral Node.js server that requires a connection to a [Redis](https://redis.io/) instance. The default configuration can be overridden by setting environment variables prior to executing `yarn test` or `yarn test:integration`.
 
 ```shell
-yarn test:coverage
+# default values
+NODE_HOST="localhost"
+NODE_PORT="3000"
+REDIS_DB="0"
+REDIS_HOST="localhost"
+REDIS_PASSWORD=""
+REDIS_PORT="6379"
+
 ```
 
 ## License

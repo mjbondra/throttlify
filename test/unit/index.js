@@ -20,7 +20,7 @@ describe('throttlify', () => {
 
   beforeEach(() => {
     ctx = null;
-    opts = { max: 5, ms: 500 };
+    opts = { duration: 500, max: 5 };
     stubConfig = {
       asyncFunction: {
         ctx: {
@@ -49,6 +49,7 @@ describe('throttlify', () => {
 
     it('should execute the async function when the queue is smaller than the max', async () => {
       const data = await throttledAsyncFunction();
+      expect(asyncFunction).to.have.been.called();
       expect(data).to.equal(stubConfig.asyncFunction.data);
     });
 
@@ -57,21 +58,27 @@ describe('throttlify', () => {
       Array.from(new Array(opts.max)).forEach(() => throttledAsyncFunction());
       const data = await throttledAsyncFunction();
       const duration = Date.now() - start;
+      expect(asyncFunction).to.have.been.called();
       expect(data).to.equal(stubConfig.asyncFunction.data);
-      expect(duration).to.be.at.least(opts.ms);
+      expect(duration).to.be.at.least(opts.duration);
     });
 
     it('should have catchable async function errors', async () => {
       stubConfig.asyncFunction.err = new Error('async function error');
       const data = await throttledAsyncFunction().catch(err => err);
+      expect(asyncFunction).to.have.been.called();
       expect(data).to.equal(stubConfig.asyncFunction.err);
     });
 
     it('should catch async function errors on defered async function executions', async () => {
+      const start = Date.now();
       Array.from(new Array(opts.max)).forEach(() => throttledAsyncFunction());
       stubConfig.asyncFunction.err = new Error('async function error');
       const data = await throttledAsyncFunction().catch(err => err);
+      const duration = Date.now() - start;
+      expect(asyncFunction).to.have.been.called();
       expect(data).to.equal(stubConfig.asyncFunction.err);
+      expect(duration).to.be.at.least(opts.duration);
     });
 
     describe('context', () => {

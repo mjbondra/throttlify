@@ -28,7 +28,7 @@ unit:
 
 integration:
   services:
-    - redis
+    - redis:latest
   script: ci-node-test integration
   stage: test
   variables:

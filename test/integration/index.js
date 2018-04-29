@@ -35,7 +35,7 @@ describe('integration', () => {
   let url;
 
   before(() => {
-    db = new Redis(config.redis);
+    db = new Redis(config.redis.port, config.redis.host);
     errorMessage = 'rate limit exceeded';
     opts = { duration: 1000, max: 2 };
     app = koaApp({ db, errorMessage, ...opts });

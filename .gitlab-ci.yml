@@ -45,19 +45,19 @@ coverage:
     - ci-git-readme-badge -b coverage
   stage: test
 
-# release:
-#   only:
-#     - master
-#   script:
-#     - ci-git-config
-#     - ci-git-readme-badge -b pipeline
-#     - ci-git-release -a README.md
-#   stage: deploy
-#
-# publish:
-#   only:
-#     - tags
-#   script:
-#     - ci-node-config
-#     - ci-node-release
-#   stage: deploy
+release:
+  only:
+    - master
+  script:
+    - ci-git-config
+    - ci-git-readme-badge -b pipeline
+    - ci-git-release -a README.md
+  stage: deploy
+
+publish:
+  only:
+    - tags
+  script:
+    - ci-node-config
+    - ci-node-release
+  stage: deploy

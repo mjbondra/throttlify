@@ -18,6 +18,19 @@ npm i throttlify
 
 ## Usage
 
+### API
+
+#### `throttlify(asyncFn, [opts], [ctx])`
+
+- **asyncFn** {*Function*} asynchronous function (*required*)
+- [**opts**] {*Object*} throttle options
+  - [**duration**=15000] {*Number*} throttle duration
+  - [**max**=10] {*Number*} maximum number of requests per duration
+- [**ctx**] {*Object*} context
+- **returns** {*Function*} throttled asynchronous function
+
+### Example
+
 ```javascript
 'use strict';
 

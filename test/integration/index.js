@@ -1,6 +1,5 @@
 'use strict';
 
-const { argv } = require('yargs');
 const chai = require('chai');
 const dirtyChai = require('dirty-chai');
 const fetch = require('node-fetch');
@@ -10,17 +9,18 @@ const koaApp = require('./helpers/koa-app');
 const throttlify = require('../../lib');
 
 const { expect } = chai;
+const { env } = process;
 
 const config = {
   node: {
-    host: argv.NODE_HOST || 'localhost',
-    port: argv.NODE_PORT || 3000
+    host: env.NODE_HOST || 'localhost',
+    port: env.NODE_PORT || 3000
   },
   redis: {
-    db: argv.REDIS_DB || 0,
-    host: argv.REDIS_HOST || 'localhost',
-    password: argv.REDIS_PASSWORD || null,
-    port: argv.REDIS_PORT || 6379
+    db: env.REDIS_DB || 0,
+    host: env.REDIS_HOST || 'localhost',
+    password: env.REDIS_PASSWORD || null,
+    port: env.REDIS_PORT || 6379
   }
 };
 

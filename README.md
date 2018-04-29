@@ -87,7 +87,7 @@ yarn test:coverage
 
 ```
 
-The integration tests require Redis and create an ephemeral Node.js server. The default configuration can be overridden by setting environment variables prior to executing `yarn test` or `yarn test:integration`.
+The integration tests create an ephemeral Node.js server that requires a connection to a [Redis](https://redis.io/) instance. The default configuration can be overridden by setting environment variables prior to executing `yarn test` or `yarn test:integration`.
 
 ```shell
 # default values

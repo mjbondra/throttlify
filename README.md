@@ -44,9 +44,10 @@ const fetch = require('node-fetch');
 const throttledFetch = throttlify(fetch, { duration: 60000, max: 45 });
 const url = 'https://jsonplaceholder.typicode.com/posts';
 
+// create 45 concurrent requests
 Array.from(new Array(45)).forEach((v, i) => throttledFetch(`${url}/${i + 1}`));
 
-// this call will execute 60 seconds after the completion of the first request
+// 46th request executes 60 seconds after first response to previous requests
 throttledFetch(url)
   .then(res => res.json())
   .then(body => console.log(body))

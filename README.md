@@ -1,6 +1,6 @@
 # throttlify
 
-[![pipeline status](https://gitlab.com/wondermonger/throttlify/badges/v1.0.5/pipeline.svg)](https://gitlab.com/wondermonger/throttlify/pipelines/21269126) [![coverage report](https://gitlab.com/wondermonger/throttlify/badges/v1.0.5/coverage.svg)](https://wondermonger.gitlab.io/-/throttlify/-/jobs/65609551/artifacts/coverage/index.html)
+[![pipeline status](https://gitlab.com/wondermonger/throttlify/badges/v1.0.6/pipeline.svg)](https://gitlab.com/wondermonger/throttlify/pipelines/21270037) [![coverage report](https://gitlab.com/wondermonger/throttlify/badges/v1.0.6/coverage.svg)](https://wondermonger.gitlab.io/-/throttlify/-/jobs/65612405/artifacts/coverage/index.html)
 
 A function that returns a throttled variant of a Promise-returning function.
 

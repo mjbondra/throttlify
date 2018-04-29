@@ -48,7 +48,7 @@ describe('throttlify', () => {
 
     beforeEach(() => {
       throttledAsyncFunction = throttlify(asyncFunction, opts);
-      obs = new PerformanceObserver((list) => {
+      obs = new PerformanceObserver(list => {
         [ run = {} ] = list.getEntries();
         obs.disconnect();
       });

@@ -2,6 +2,7 @@
 
 const chai = require('chai');
 const dirtyChai = require('dirty-chai');
+const { performance, PerformanceObserver } = require('perf_hooks'); // eslint-disable-line
 const sinonChai = require('sinon-chai');
 
 const stubs = require('./stubs');
@@ -41,10 +42,17 @@ describe('throttlify', () => {
   });
 
   describe('throttled async function', () => {
+    let obs;
+    let run;
     let throttledAsyncFunction;
 
     beforeEach(() => {
       throttledAsyncFunction = throttlify(asyncFunction, opts);
+      obs = new PerformanceObserver((list) => {
+        [ run = {} ] = list.getEntries();
+        obs.disconnect();
+      });
+      obs.observe({ entryTypes: ['measure'] });
     });
 
     it('should execute the async function when the queue is smaller than the max', async () => {
@@ -54,13 +62,14 @@ describe('throttlify', () => {
     });
 
     it('should defer the execution of the async function when the queue is larger than the max', async () => {
-      const start = Date.now();
+      performance.mark('start');
       Array.from(new Array(opts.max)).forEach(() => throttledAsyncFunction());
       const data = await throttledAsyncFunction();
-      const duration = Date.now() - start;
+      performance.mark('finish');
+      performance.measure('run', 'start', 'finish');
       expect(asyncFunction).to.have.been.called();
       expect(data).to.equal(stubConfig.asyncFunction.data);
-      expect(duration).to.be.at.least(opts.duration);
+      expect(run.duration).to.be.at.least(opts.duration);
     });
 
     it('should have catchable async function errors', async () => {
@@ -71,14 +80,15 @@ describe('throttlify', () => {
     });
 
     it('should catch async function errors on defered async function executions', async () => {
-      const start = Date.now();
+      performance.mark('start');
       Array.from(new Array(opts.max)).forEach(() => throttledAsyncFunction());
       stubConfig.asyncFunction.err = new Error('async function error');
       const data = await throttledAsyncFunction().catch(err => err);
-      const duration = Date.now() - start;
+      performance.mark('finish');
+      performance.measure('run', 'start', 'finish');
       expect(asyncFunction).to.have.been.called();
       expect(data).to.equal(stubConfig.asyncFunction.err);
-      expect(duration).to.be.at.least(opts.duration);
+      expect(run.duration).to.be.at.least(opts.duration);
     });
 
     describe('context', () => {

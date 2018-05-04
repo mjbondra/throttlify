@@ -1,5 +1,6 @@
 'use strict';
 
+const { performance } = require('perf_hooks'); // eslint-disable-line
 const { spy } = require('sinon');
 
 /**
@@ -9,14 +10,22 @@ const { spy } = require('sinon');
  * @param {Error} [config.ctx.err] - ctx error
  * @param {Boolean} [config.ctx.required] - ctx requirement
  * @param {Object} [config.data] - method response data
+ * @param {Number} [config.delay=500] - delay in ms
  * @param {Error} [config.err] - method error
  * @returns {Object} - async function stub
  */
 module.exports = (config = {}) => {
+  let count = 0;
+
   async function asyncFn () {
-    const { ctx, data, err } = config;
+    const id = ++count;
+    performance.mark(`fn-${id}-start`);
+
+    const { ctx, data, delay = 250, err } = config;
     if (err) throw err;
     if (ctx.required && !this) throw ctx.err || new Error('missing context');
+    await new Promise(resolve => setTimeout(resolve, delay));
+    performance.mark(`fn-${id}-finish`);
     return data;
   }
 

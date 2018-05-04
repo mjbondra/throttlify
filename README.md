@@ -28,8 +28,9 @@ npm i throttlify
 
 - **asyncFn** {*Function*} asynchronous function (*required*)
 - [**opts**] {*Object*} throttle options
-  - [**duration**=15000] {*Number*} throttle duration in milliseconds
-  - [**max**=10] {*Number*} maximum number of requests per duration
+  - [**concurrent**] {*Number*} maximum number of concurrent requests
+  - [**duration**=60000] {*Number*} throttle duration in milliseconds
+  - [**max**=60] {*Number*} maximum number of requests per duration
 - [**ctx**] {*Object*} `this` parameter for the **asyncFn** function
 - **returns** {*Function*} throttled asynchronous function
 

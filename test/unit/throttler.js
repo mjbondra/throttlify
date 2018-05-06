@@ -312,6 +312,10 @@ describe('class: Throttler', () => {
         queueShift.restore();
       });
 
+      it('should resolve the throttler instance', async () => {
+        expect(await shift(asyncFn())).to.equal(throttler);
+      });
+
       it('should call "queueShift" with the concurrent queue when the "pending" promise resolves', async () => {
         const count = throttler.count.concurrent;
         const [ queueFn ] = throttler.queue.concurrent;

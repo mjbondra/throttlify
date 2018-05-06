@@ -211,152 +211,84 @@ describe('class: Throttler', () => {
     });
 
     describe('pause', () => {
+      let delay;
       let pause;
       let queuePause;
 
       beforeEach(() => {
+        delay = throttler.duration / 2;
         pause = throttler.pause.bind(throttler);
-        queuePause = spy(Throttler, 'queuePause');
+        queuePause = stub(Throttler, 'queuePause')
+          .callsFake(() => new Promise(resolve => setTimeout(resolve, delay)));
       });
 
       afterEach(() => {
         queuePause.restore();
       });
 
-      describe('rate limit', () => {
-        it('should not call "queuePause" when duration count is less than "max"', async () => {
-          const count = throttler.count.duration = opts.max - 1;
-          await pause();
-          expect(queuePause).to.not.have.been.called();
-          expect(throttler.count.duration).to.equal(count + 1);
-        });
-
-        it('should call and await "queuePause" with the duration queue when duration count is equal to "max"', async () => {
-          const count = throttler.count.duration = opts.max;
-          const delay = throttler.duration;
-          setTimeout(() => throttler.queue.duration.shift()(), delay);
-          await pause();
-          expect(queuePause).to.have.been.calledWith(throttler.queue.duration);
-          expect(throttler.count.duration).to.equal(count + 1);
-        });
-
-        it('should resolve immediately when duration count is less than "max"', async () => {
-          const count = throttler.count.duration = opts.max - 1;
-          performance.mark('start');
-          await pause();
-          performance.mark('end');
-          performance.measure('resolve', 'start', 'end');
-          expect(throttler.count.duration).to.equal(count + 1);
-          expect(entries[0].duration).to.be.closeTo(0, allowance);
-        });
-
-        it('should defer resolution when duration count is equal to "max"', async () => {
-          const delay = throttler.duration;
-          throttler.count.duration = opts.max;
-          setTimeout(() => throttler.queue.duration.shift()(), delay);
-          performance.mark('start');
-          await pause();
-          performance.mark('end');
-          performance.measure('resolve', 'start', 'end');
-          expect(entries[0].duration).to.be.closeTo(delay, allowance);
-        });
+      it('should resolve the throttler instance', async () => {
+        expect(await pause()).to.equal(throttler);
       });
 
-      describe('concurrency', () => {
-        it('should not call "queuePause" when "concurrent" is undefined', async () => {
-          throttler.concurrent = opts.concurrent = undefined;
-          const count = throttler.count.concurrent = opts.max / 2;
-          await pause();
-          expect(queuePause).to.not.have.been.called();
-          expect(throttler.count.concurrent).to.equal(count + 1);
-        });
-
-        it('should not call "queuePause" when concurrent count is less than "concurrent"', async () => {
-          throttler.concurrent = opts.concurrent = opts.max / 2;
-          const count = throttler.count.concurrent = throttler.concurrent - 1;
-          await pause();
-          expect(queuePause).to.not.have.been.called();
-          expect(throttler.count.concurrent).to.equal(count + 1);
-        });
-
-        it('should call and await "queuePause" with the concurrent queue when concurrent count is equal to "concurrent"', async () => {
-          throttler.concurrent = opts.concurrent = opts.max / 2;
-          const count = throttler.count.concurrent = throttler.concurrent;
-          const delay = throttler.duration;
-          setTimeout(() => throttler.queue.concurrent.shift()(), delay);
-          await pause();
-          expect(queuePause).to.have.been.calledWith(throttler.queue.concurrent);
-          expect(throttler.count.concurrent).to.equal(count + 1);
-        });
-
-        it('should resolve immediately when "concurrent" is undefined', async () => {
-          throttler.concurrent = opts.concurrent = undefined;
-          const count = throttler.count.concurrent = opts.max / 2;
-          performance.mark('start');
-          await pause();
-          performance.mark('end');
-          performance.measure('resolve', 'start', 'end');
-          expect(throttler.count.concurrent).to.equal(count + 1);
-          expect(entries[0].duration).to.be.closeTo(0, allowance);
-        });
-
-        it('should resolve immediately when concurrent count is less than "concurrent"', async () => {
-          throttler.concurrent = opts.concurrent = opts.max / 2;
-          const count = throttler.count.concurrent = throttler.concurrent - 1;
-          performance.mark('start');
-          await pause();
-          performance.mark('end');
-          performance.measure('resolve', 'start', 'end');
-          expect(throttler.count.concurrent).to.equal(count + 1);
-          expect(entries[0].duration).to.be.closeTo(0, allowance);
-        });
-
-        it('should defer resolution of when concurrent count is equal to "concurrent"', async () => {
-          throttler.concurrent = opts.concurrent = opts.max / 2;
-          const count = throttler.count.concurrent = throttler.concurrent;
-          const delay = throttler.duration;
-          setTimeout(() => throttler.queue.concurrent.shift()(), delay);
-          performance.mark('start');
-          await pause();
-          performance.mark('end');
-          performance.measure('resolve', 'start', 'end');
-          expect(throttler.count.concurrent).to.equal(count + 1);
-          expect(entries[0].duration).to.be.closeTo(delay, allowance);
-        });
+      it('should not call "queue" pause when duration count is less than "max" and "concurrent" is undefined', async () => {
+        performance.mark('start');
+        await pause();
+        performance.mark('finish');
+        performance.measure('start to finish', 'start', 'finish');
+        expect(queuePause).to.not.have.been.called();
+        expect(throttler.count.concurrent).to.equal(1);
+        expect(throttler.count.duration).to.equal(1);
+        expect(entries[0].duration).to.be.closeTo(0, allowance);
       });
 
-      describe('rate limit and concurrency', () => {
-        it('should call and await "queuePause" with each queue when duration count is equal to "max" and concurrent count is equal to "concurrent"', async () => {
-          const count = {
-            concurrent: throttler.count.concurrent = throttler.concurrent = throttler.max / 2,
-            duration: throttler.count.duration = throttler.max
-          };
-          const delay = throttler.duration + (throttler.duration / 2);
-          setTimeout(() => throttler.queue.duration.shift()(), throttler.duration);
-          setTimeout(() => throttler.queue.concurrent.shift()(), delay);
-          await pause();
-          expect(queuePause).to.have.been.calledWith(throttler.queue.concurrent);
-          expect(queuePause).to.have.been.calledWith(throttler.queue.duration);
-          expect(throttler.count.concurrent).to.equal(count.concurrent + 1);
-          expect(throttler.count.duration).to.equal(count.duration + 1);
-        });
+      it('should not call "queue" pause when duration count is less than "max" and concurrent count is less than "concurrent"', async () => {
+        throttler.conccurent = throttler.max / 2;
+        performance.mark('start');
+        await pause();
+        performance.mark('finish');
+        performance.measure('start to finish', 'start', 'finish');
+        expect(queuePause).to.not.have.been.called();
+        expect(throttler.count.concurrent).to.equal(1);
+        expect(throttler.count.duration).to.equal(1);
+        expect(entries[0].duration).to.be.closeTo(0, allowance);
+      });
 
-        it('should defer resolution when duration count is equal to "max" and concurrent count is equal to "concurrent"', async () => {
-          const count = {
-            concurrent: throttler.count.concurrent = throttler.concurrent = throttler.max / 2,
-            duration: throttler.count.duration = throttler.max
-          };
-          const delay = throttler.duration + (throttler.duration / 2);
-          setTimeout(() => throttler.queue.duration.shift()(), throttler.duration);
-          setTimeout(() => throttler.queue.concurrent.shift()(), delay);
-          performance.mark('start');
-          await pause();
-          performance.mark('end');
-          performance.measure('resolve', 'start', 'end');
-          expect(throttler.count.concurrent).to.equal(count.concurrent + 1);
-          expect(throttler.count.duration).to.equal(count.duration + 1);
-          expect(entries[0].duration).to.be.closeTo(delay, allowance);
-        });
+      it('should call and await "queuePause" with the duration queue when duration count is equal to "max"', async () => {
+        const durationCount = throttler.count.duration = throttler.max;
+        performance.mark('start');
+        await pause();
+        performance.mark('finish');
+        performance.measure('start to finish', 'start', 'finish');
+        expect(queuePause).to.have.been.calledWith(throttler.queue.duration);
+        expect(throttler.count.duration).to.equal(durationCount + 1);
+        expect(entries[0].duration).to.be.closeTo(delay, allowance);
+      });
+
+      it('should call and await "queuePause" with the concurrent queue when conccurent count is equal to "concurrent"', async () => {
+        throttler.concurrent = throttler.max / 2;
+        const concurrentCount = throttler.count.concurrent = throttler.concurrent;
+        performance.mark('start');
+        await pause();
+        performance.mark('finish');
+        performance.measure('start to finish', 'start', 'finish');
+        expect(queuePause).to.have.been.calledWith(throttler.queue.concurrent);
+        expect(throttler.count.concurrent).to.equal(concurrentCount + 1);
+        expect(entries[0].duration).to.be.closeTo(delay, allowance);
+      });
+
+      it('should call and await "queuePause" with each queue when duration count is equal to "max" and concurrent count is equal to "concurrent"', async () => {
+        throttler.concurrent = throttler.max / 2;
+        const concurrentCount = throttler.count.concurrent = throttler.concurrent;
+        const durationCount = throttler.count.duration = throttler.max;
+        performance.mark('start');
+        await pause();
+        performance.mark('finish');
+        performance.measure('start to finish', 'start', 'finish');
+        expect(queuePause).to.have.been.calledWith(throttler.queue.concurrent);
+        expect(queuePause).to.have.been.calledWith(throttler.queue.duration);
+        expect(throttler.count.concurrent).to.equal(concurrentCount + 1);
+        expect(throttler.count.duration).to.equal(durationCount + 1);
+        expect(entries[0].duration).to.be.closeTo(delay * 2, allowance);
       });
     });
 

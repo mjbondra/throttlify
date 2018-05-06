@@ -10,7 +10,7 @@ const { spy } = require('sinon');
  * @param {Error} [config.ctx.err] - ctx error
  * @param {Boolean} [config.ctx.required] - ctx requirement
  * @param {Object} [config.data] - method response data
- * @param {Number} [config.delay=500] - delay in ms
+ * @param {Number} [config.delay=250] - delay in ms
  * @param {Error} [config.err] - method error
  * @returns {Object} - async function stub
  */

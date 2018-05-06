@@ -7,6 +7,7 @@ const Redis = require('ioredis');
 
 const koaApp = require('./helpers/koa-app');
 const throttlify = require('../../lib');
+const Throttler = require('../../lib/throttler');
 
 const { expect } = chai;
 const { env } = process;
@@ -29,18 +30,20 @@ const config = {
 chai.use(dirtyChai);
 
 describe('integration', () => {
+  let allowance;
   let app;
   let db;
-  let errorMessage;
+  let delay;
   let opts;
   let server;
   let url;
 
   before(() => {
+    allowance = 10;
     db = new Redis(config.redis.port, config.redis.host, config.redis.options);
-    errorMessage = 'rate limit exceeded';
     opts = { duration: 1000, max: 20 };
-    app = koaApp({ db, errorMessage, ...opts });
+    delay = opts.duration + allowance;
+    app = koaApp({ db, ...opts });
     server = app.listen(config.node);
   });
 
@@ -51,56 +54,61 @@ describe('integration', () => {
 
   beforeEach(async () => {
     url = `http://${config.node.host}:${config.node.port}`;
-    await fetch(url); // prime
-    await new Promise(resolve => setTimeout(resolve, opts.duration)); // delay
   });
 
-  afterEach(async () => {
-    await new Promise(resolve => setTimeout(resolve, opts.duration)); // delay
+  afterEach(async () => { // delay
+    await Throttler.durationPause(delay);
   });
 
   describe('happy path', () => {
     it('should throttle requests and not exceed the rate limit of the server', async () => {
+      const n = opts.max;
       const throttledFetch = throttlify(fetch, opts);
-      const requests = Array.from(new Array(opts.max * 4)).map(() => throttledFetch(url));
+      const requests = Array.from(new Array(n)).map(() => throttledFetch(url));
       const responses = await Promise.all(requests);
-      const jsonArray = await Promise.all(responses.map(response => response.json()));
-      jsonArray.forEach(body => expect(body.count).to.be.a('number'));
+      const successes = responses.filter(res => res.status >= 200 && res.status < 400);
+      const errors = responses.filter(res => res.status >= 400);
+      expect(successes.length).to.equal(n);
+      expect(errors.length).to.equal(0);
     });
   });
 
   describe('non-throttled function', () => {
     it('should exceed the rate limit of the server', async () => {
-      const requests = Array.from(new Array(opts.max * 4)).map(() => fetch(url));
+      const n = opts.max + 1;
+      const requests = Array.from(new Array(n)).map(() => fetch(url));
       const responses = await Promise.all(requests);
-      const jsonArray = await Promise.all(responses.map(response => response.json()));
-      jsonArray.forEach((body, index) => {
-        if (index >= opts.max) expect(body.message).to.equal(errorMessage);
-        else expect(body.count).to.be.a('number');
-      });
+      const successes = responses.filter(res => res.status >= 200 && res.status < 400);
+      const errors = responses.filter(res => res.status >= 400);
+      expect(successes.length).to.equal(opts.max);
+      expect(errors.length).to.equal(n - opts.max);
+      errors.map(res => expect(res.status).to.equal(429));
     });
   });
 
   describe('throttled function that is improperly tuned', () => {
     it('should exceed the rate limit of the server when max is too high', async () => {
-      const elevatedMax = opts.max + 1;
-      const throttledFetch = throttlify(fetch, { ...opts, max: elevatedMax });
-      const requests = Array.from(new Array(elevatedMax)).map(() => throttledFetch(url));
+      const n = opts.max + 1;
+      const throttledFetch = throttlify(fetch, { ...opts, max: n });
+      const requests = Array.from(new Array(n)).map(() => throttledFetch(url));
       const responses = await Promise.all(requests);
-      const jsonArray = await Promise.all(responses.map(response => response.json()));
-      expect(jsonArray[opts.max].message).to.equal(errorMessage);
+      const successes = responses.filter(res => res.status >= 200 && res.status < 400);
+      const errors = responses.filter(res => res.status >= 400);
+      expect(successes.length).to.equal(opts.max);
+      expect(errors.length).to.equal(n - opts.max);
+      errors.map(res => expect(res.status).to.equal(429));
     });
 
     it('should exceed the rate limit of the server when duration is too small', async () => {
-      const shrunkenDuration = opts.duration / 2;
-      const throttledFetch = throttlify(fetch, { ...opts, duration: shrunkenDuration });
-      const requests = Array.from(new Array(opts.max * 2)).map(() => throttledFetch(url));
+      const n = opts.max + 1;
+      const throttledFetch = throttlify(fetch, { ...opts, duration: opts.duration / 2 });
+      const requests = Array.from(new Array(n)).map(() => throttledFetch(url));
       const responses = await Promise.all(requests);
-      const jsonArray = await Promise.all(responses.map(response => response.json()));
-      jsonArray.forEach((body, index) => {
-        if (index >= opts.max) expect(body.message).to.equal(errorMessage);
-        else expect(body.count).to.be.a('number');
-      });
+      const successes = responses.filter(res => res.status >= 200 && res.status < 400);
+      const errors = responses.filter(res => res.status >= 400);
+      expect(successes.length).to.equal(opts.max);
+      expect(errors.length).to.equal(n - opts.max);
+      errors.map(res => expect(res.status).to.equal(429));
     });
   });
 });

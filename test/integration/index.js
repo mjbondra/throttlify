@@ -39,7 +39,7 @@ describe('integration', () => {
   let url;
 
   before(() => {
-    allowance = 10;
+    allowance = 20;
     db = new Redis(config.redis.port, config.redis.host, config.redis.options);
     opts = { duration: 1000, max: 20 };
     delay = opts.duration + allowance;
@@ -56,14 +56,14 @@ describe('integration', () => {
     url = `http://${config.node.host}:${config.node.port}`;
   });
 
-  afterEach(async () => { // delay
+  afterEach(async () => {
     await Throttler.durationPause(delay);
   });
 
   describe('happy path', () => {
     it('should throttle requests and not exceed the rate limit of the server', async () => {
-      const n = opts.max;
-      const throttledFetch = throttlify(fetch, opts);
+      const n = opts.max + 1;
+      const throttledFetch = throttlify(fetch, { ...opts, duration: delay });
       const requests = Array.from(new Array(n)).map(() => throttledFetch(url));
       const responses = await Promise.all(requests);
       const successes = responses.filter(res => res.status >= 200 && res.status < 400);

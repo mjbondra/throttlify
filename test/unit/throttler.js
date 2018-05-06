@@ -369,8 +369,8 @@ describe('class: Throttler', () => {
         const pending = asyncFn();
         performance.mark('start');
         await shift(pending);
-        performance.mark('end');
-        performance.measure('resolve', 'start', 'end');
+        performance.mark('finish');
+        performance.measure('start to finish', 'start', 'finish');
         expect(entries[0].duration).to.be.closeTo(opts.duration, allowance);
       });
 
@@ -380,8 +380,8 @@ describe('class: Throttler', () => {
         const pending = asyncFn();
         performance.mark('start');
         await shift(pending);
-        performance.mark('end');
-        performance.measure('resolve', 'start', 'end');
+        performance.mark('finish');
+        performance.measure('start to finish', 'start', 'finish');
         expect(entries[0].duration).to.be.closeTo(stubConfig.asyncFunction.delay, allowance);
       });
     });

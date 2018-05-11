@@ -1,1 +1,1 @@
-include: https://gitlab.com/wondermonger/ci-tools/raw/v3.0.0/tpl/node/base.yml
+include: https://gitlab.com/wondermonger/ci-tools/raw/master/tpl/node/base.yml
